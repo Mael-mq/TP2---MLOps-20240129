@@ -32,6 +32,10 @@ configure_uploads(app, photos)
 
 @app.route('/')
 def home():
+    return render_template('home.html')
+
+@app.route('/gas-emission')
+def gasEmission():
     return render_template('input.html')
 
 @app.route('/predict', methods=['POST'])
@@ -59,6 +63,20 @@ def upload():
         prediction = predictImageCategory(f'./static/img/{filename}')
         return render_template('upload.html', filename=filename, prediction=prediction)
     return render_template('upload.html')
+
+
+
+@app.route('/api/email-predict', methods=['POST'])
+def email_predict():
+    cv = pickle.load(open('./models/cv.pkl', 'rb'))
+    clf = pickle.load(open('./models/clf.pkl', 'rb'))
+    data = request.get_json(force=True)
+    
+    tokenized_email = cv.transform([data['email']])
+    prediction = clf.predict(tokenized_email)
+    return jsonify({'prediction': prediction.item()})
+
+    
 
 if __name__ == '__main__':
     app.run()
